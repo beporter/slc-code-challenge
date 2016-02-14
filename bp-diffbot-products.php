@@ -2,12 +2,10 @@
 /**
  * BP Diffbot Products bootstrap
  *
- * Provides plugin info the the UI. Pulls in required source files,
- * registers de/activation hooks and defines the entry method for the
- * plugin.
+ * Provides plugin info the the WP UI. Pulls in required source files,
+ * registers de/activation hooks as well as any functionality hooks.
  *
- * @link              http://example.com
- * @since             1.0.0
+ * @link              https://github.com/beporter/wirecutter-code-challenge
  * @package           Bpdiff
  *
  * @wordpress-plugin
@@ -23,13 +21,15 @@
  * Domain Path:       /languages
  */
 
-// Abort if called directly.
+/**
+ * Abort if called directly.
+ */
 if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
 /**
- * Register bootstrapping callbacks.
+ * Register plugin bootstrapping callbacks that are only needed for install/uninstall.
  */
 function bpdiff_activate() {
 	require_once plugin_dir_path( __FILE__ ) . 'includes/class-bpdiff-bootstrap.php';
@@ -53,8 +53,8 @@ register_uninstall_hook( __FILE__, 'bpdiff_uninstall' );
 /**
  * Begins execution of the plugin.
  *
- * The core plugin class is used to define internationalization,
- * admin-specific hooks, and public-facing site hooks.
+ * The core plugin class is used to include and declare the classes
+ * reponsible for handling the admin hooks.
  *
  * Since everything within the plugin is registered via hooks,
  * kicking off the plugin from this point in the file does

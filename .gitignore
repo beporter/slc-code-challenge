@@ -17,11 +17,10 @@ wp-content/plugins/hello.php
 /readme.html
 /license.txt
 
-# Composer
+# Dependencies/Development
 /vendor
-
-# Vagrant
 /.vagrant
+/.puli
 
 # Numerous always-ignore extensions
 *.diff
