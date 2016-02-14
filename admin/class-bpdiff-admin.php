@@ -106,12 +106,9 @@ class Bpdiff_Admin {
 	}
 
 	/**
-	 * Register and add settings.
+	 * Register and add settings for the plugin.
 	 *
-	 * We're overloading the Settings API to provide a clean interface
-	 * for presenting the URL form and processing its submission. This is
-	 * kind of hacky since we don't need to (and won't) persist the
-	 * submitted URL in the DB, but there aren't many cleaner choices.
+	 * We only have a single `apikey` setting to store.
 	 *
 	 * @see Bpdiff::define_admin_hooks()
 	 * @return void
@@ -123,23 +120,53 @@ class Bpdiff_Admin {
 		register_setting(
 			'bpdiff_settings',
 			'bpdiff_settings',
-			array( $this, 'sanitize' )
+			array( $this, 'sanitize_settings' )
 		);
 
 		add_settings_section(
 			'bpdiff_diffbot',
 			'DiffBot API Key',
-			array( $this, 'print_section_info' ),
+			array( $this, 'print_settings_info' ),
 			'bpdiff-settings'
 		);
 
 		add_settings_field(
 			'apikey',
 			'DiffBot API Key',
-			array( $this, 'field_apikey_callback' ),
+			array( $this, 'draw_setting_apikey' ),
 			'bpdiff-settings',
 			'bpdiff_diffbot'
 		);
+	}
+
+	/**
+	 * Inject meta boxes into the add/edit screens for our custom Products post type.
+	 *
+	 * @see Bpdiff::define_admin_hooks()
+	 * @return void
+	 */
+	public function pages_init() {
+
+		// inject meta boxes into the post editing screen.
+		add_meta_box(
+			'regular_price', // unique field id
+			'Regular Price', // box title
+			[$this, 'draw_meta_regular_price'], // content callback
+			'bpdiffbot-products' // post type
+		);
+//@TODO: enable after completing regular_price as a guide
+// 		add_meta_box(
+// 			'offer_price',
+// 			'Offer Price',
+// 			[$this, 'draw_meta_offer_price'],
+// 			'bpdiffbot-products'
+// 		);
+// 		add_meta_box(
+// 			'source_url',
+// 			'Source URL',
+// 			[$this, 'draw_meta_source_url'],
+// 			'bpdiffbot-products'
+// 		);
 	}
 
 	/**
@@ -210,7 +237,7 @@ class Bpdiff_Admin {
 		}
 
 		// Product post was created successfully. Redirect to it.
-		$params = [ //@TODO update this for custom post type.
+		$params = [
 			'post' => $productPostId,
 			'post_type' => 'bpdiffbot-products',
 			'action' => 'edit',
@@ -284,7 +311,7 @@ class Bpdiff_Admin {
 	 * @param array $input Contains all settings fields as array keys
 	 * @return array Sanitized values for $input.
 	 */
-	public function sanitize( $input ) {
+	public function sanitize_settings( $input ) {
 		$valid_input = array();
 
 		if ( isset( $input['apikey'] ) ) {
@@ -303,7 +330,7 @@ class Bpdiff_Admin {
 	 *
 	 * @return void
 	 */
-	public function print_section_info() {
+	public function print_settings_info() {
 		print 'In order to use the DiffBot Product API, you must configure WordPress with a valid API key. <a href="https://www.diffbot.com/plans/trial">A free trial key</a> can be obtained for temporary use, otherwise you must register for a <a href="https://www.diffbot.com/pricing/">paid plan</a>. Please enter your DiffBot API key below.';
 	}
 
@@ -312,11 +339,23 @@ class Bpdiff_Admin {
 	 *
 	 * @return void
 	 */
-	public function field_apikey_callback() {
+	public function draw_setting_apikey() {
 		printf(
 			'<input type="text" class="standard-text code" id="apikey" name="bpdiff_settings[apikey]" value="%s" />',
 			isset( $this->options['apikey'] ) ? esc_attr( $this->options['apikey']) : ''
 		);
+	}
+
+	/**
+	 * Echo HTML to render the input for the `regular_price` field.
+	 *
+	 * @return void
+	 */
+	public function draw_meta_regular_price($post) {
+		$template = '<input type="text" class="large-text" id="%1$s" name="%1$s" value="%2$s" />';
+		$field = 'bpdiff_regular_price';
+		$value = get_post_meta( $post->ID, $field, true );
+		printf($template, $field, $value);
 	}
 
 	/**
@@ -406,6 +445,7 @@ class Bpdiff_Admin {
 	 */
 	protected function redirect($code, $params = []) {
 		$options = [
+			'post_type' => 'bpdiffbot-products',
 			'page' => 'bpdiff-addpost',
 			'bpdiff' => array_merge( [
 				'errors' => [ $code ],

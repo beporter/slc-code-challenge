@@ -5,12 +5,14 @@ Code challenge for wirecutter.com. Provides a WP-Admin interface for adding cust
 
 ## Requirements
 
-* PHP 5.6
-* WordPress 4.4 or later.
+* PHP 5.5
+* WordPress 4.4 or later (maybe earlier, not tested).
 
 ## Features
 
-* @TODO
+* Provides a new custom post type `bpdiff-products` that includes custom fields for `regular_price`, `offer_price`, `source_url`.
+* Presents a settings page for saving your DiffBot API token.
+* Presents an **Import from URL** page for creating a new Product post using a public URL from Amazon.com, Target.com and practically any other online storefront.
 
 
 ## Installation
@@ -21,28 +23,77 @@ Download the [latest release](https://github.com/dbeporter/wirecutter-code-chall
 
 ### Composer
 
-If you're using Composer to manage WordPress, add this plugin to your project's dependencies. Run:
+#### Packagist
+
+@TODO: These instructions would work if the project was public and published on [Packagist](https://packagist.org).
 
 ```sh
 composer require beporter/bp-diffbot-products ~0.0.1
+```
+
+or
+
+```json
+"require": {
+  "php": ">=5.5.0",
+  "wordpress": "~4.4.0",
+  "beporter/bp-diffbot-products": "~0.0.1"
+}
+```
+
+#### Wordpress Packagist
+
+@TODO: These instructions would work if the project was public and published in the [Plugins Directory](https://wordpress.org/plugins/) (and mirrored to [WordPress Packagist](http://wpackagist.org/)).
+
+If you're using Composer to manage WordPress, add this plugin to your project's dependencies. Run:
+
+First, ensure your composer.json includes the Wordpress Packagist repository:
+
+```json
+    "repositories":[
+        {
+            "type":"composer",
+            "url":"http://wpackagist.org"
+        }
+    ]
+```
+
+Then, inject the plugin into your config:
+
+```sh
+composer require wpackagist-plugin/bp-diffbot-products ~0.0.1
 ```
 
 Or manually add it to your `composer.json`:
 
 ```json
 "require": {
-  "php": ">=5.6.0",
+  "php": ">=5.5.0",
   "wordpress": "~4.4.0",
-  "beporter/bp-diffbot-products": "~0.0.1"
+  "wpackagist-plugin/bp-diffbot-products": "~0.0.1"
 }
 ```
 
-@TODO: Register this plugin on Packagist/[WordPress Packagist](http://wpackagist.org/)
+Finally, from your WP Admin panel, activate the plugin.
 
 
 ## Usage
 
-@TODO: Add setup/usage documentation.
+The plugin will create a new section in your admin interface titled **Products**, as well as a new **Settings** pane for manaing your DiffBot API key.
+
+You will not be able to generate new Product posts until you have entered a valid DiffBot API token in **Settings > Product Posts**.
+
+To import a new product page:
+
+* Browse the web and locate the product page you wish to import. For example:
+	* WordPress for Dummies: http://amzn.com/1119088577
+	* My Neighor Totoro: http://amzn.com/B00BEYYEJ4
+	* Super Mario Maker: http://www.target.com/p/-/A-47904515
+* Copy the URL from your address bar.
+* Log into your WP Admin portal.
+* Navigate to **Products > Import from URL**.
+* Paste the URL and submit the form.
+* If the process is successful, you'll be redirected to the newly-created Product post to review it.
 
 
 ## Contributing

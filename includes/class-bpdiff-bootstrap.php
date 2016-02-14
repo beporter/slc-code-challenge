@@ -57,12 +57,7 @@ class Bpdiff_Bootstrap {
 			'label'               => __( 'products', 'twentythirteen' ),
 			'description'         => __( 'Product information', 'twentythirteen' ),
 			'labels'              => $labels,
-			// Features this CPT supports in Post Editor
-			'supports'            => array( 'title', 'editor', 'excerpt', 'author', 'thumbnail', 'comments', 'revisions', 'custom-fields', ),
-			/* A hierarchical CPT is like Pages and can have
-			* Parent and child items. A non-hierarchical CPT
-			* is like Posts.
-			*/
+			'rewrite'             => array('slug' => 'products'), //@TODO: should proably be configurable in the Admin UI.
 			'hierarchical'        => false,
 			'public'              => true,
 			'show_ui'             => true,

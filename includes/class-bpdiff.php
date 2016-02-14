@@ -114,6 +114,7 @@ class Bpdiff {
 		$this->loader()->add_action( 'admin_init', [$plugin_admin, 'pages_init'] );
 		$this->loader()->add_action( 'admin_menu', [$plugin_admin, 'add_plugin_pages'] );
 		$this->loader()->add_action( 'admin_post_scrape_product_url', [$plugin_admin, 'scrape_product_url'] );
+		$this->loader()->add_action( 'when editing a Product post', [$plugin_admin, 'meta_init'] );
 	}
 
 	/**
