@@ -122,7 +122,7 @@ class Bpdiff {
 		$this->loader()->add_action( 'admin_menu', [$plugin_admin, 'add_plugin_pages'] );
 		$this->loader()->add_action( 'add_meta_boxes', [$plugin_admin, 'meta_init'] );
 		$this->loader()->add_action( 'admin_post_scrape_product_url', [$plugin_admin, 'scrape_product_url'] );
-		$this->loader()->add_action( 'save_post_' . static::postType, [$plugin_admin, 'save_meta'] );
+		$this->loader()->add_action( 'save_post_' . static::postType, [$plugin_admin, 'save_meta_hook'] );
 	}
 
 	/**

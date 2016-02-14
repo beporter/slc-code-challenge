@@ -98,13 +98,12 @@ class Bpdiff_Diffbot {
 	 * @return object
 	 */
 	protected function mapProductFields(\Swader\Diffbot\Entity\Product $product) {
-		//@TODO: Do any of these values need to be sanitize_*()d for WP not to choke?
 		return [
 			'title' => $product->getTitle(),
 			'text' => $product->getText(),
-			'offerPrice' => $product->getRegularPrice(),
-			'regularPrice' => $product->getRegularPrice(),
-			'pageUrl' => $product->getPageUrl(),
+			'offer_price' => $product->getRegularPrice(),
+			'regular_price' => $product->getRegularPrice(),
+			'source_url' => $product->getPageUrl(),
 		];
 	}
 }

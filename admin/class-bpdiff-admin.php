@@ -59,6 +59,7 @@ class Bpdiff_Admin {
 		'no-url' => 'No product URL was provided.',
 		'invalid-key' => 'The DiffBot API token is not valid.',
 		'bad-key' => 'The DiffBot API token stored in <strong>Settings > Product Posts</strong> is not valid.',
+		'no-privs' => 'Insufficient access.',
 		'create-post-failed' => 'Unable to create a new Product post from the returned DiffBot data.',
 		'create-post-successful' => 'New Product post created successfully.'
 	];
@@ -249,35 +250,18 @@ class Bpdiff_Admin {
 	 * @see Bpdiff::define_admin_hooks()
 	 * @return void
 	 */
-	public function save_meta($post_id) {
-print_r($_POST);
-// die;
+	public function save_meta_hook($post_id) {
 		// Short circuit if there is no POST data to work on.
 		if ( empty( $_POST ) ) {
 			return;
 		}
 
-		// Short circuit if current user doesn't have access to edit posts.
+		//@TODO: Short circuit if current user doesn't have access to edit posts. `no-privs`
 		if ( false ) {
 			return;
 		}
 
-		foreach ( $this->metas as $name => $props) {
-			$key = "{$this->prefix}_{$name}";
-			$sanitizer = $this->metaDefaults['sanitizer'];
-			if( isset( $props['sanitizer'] ) && is_callable( $props['sanitizer'] ) ) {
-				$sanitizer = $props['sanitizer'];
-			}
-// print_r($sanitizer);
-// die;
-			if ( ! empty( $_POST[ $key ] )) {
-				update_post_meta(
-					$post_id,
-					$key,
-					call_user_func($sanitizer, $_POST[ $key ])
-				);
-			}
-		}
+		$this->save_meta( $post_id, $_POST );
 	}
 
 	/**
@@ -289,6 +273,8 @@ print_r($_POST);
 	 * @return void
 	 */
 	public function scrape_product_url() {
+		// @TODO: Abort on lack of capability by current user. `no-privs`
+
 		// Validate necessary input params. Redirect back on missing.
 		$params = $this->get_url_params();
 		if ( empty($params['url']) ) {
@@ -296,7 +282,7 @@ print_r($_POST);
 		}
 
 		// Spin up the DiffBot wrapper. Redirect back on failure.
-		$this->options = get_option( "{$this->prefix}_settings'" );
+		$this->options = get_option( "{$this->prefix}_settings" );
 		$url = $params['url'];
 		try {
 			$bot = new Bpdiff_DiffBot( $this->options['apikey'] );
@@ -430,11 +416,8 @@ print_r($_POST);
 	 * @return void
 	 */
 	public function draw_meta_box($post) {
-		?>
-		<table class="form-table">
-			<tbody>
+		echo '<table class="form-table"><tbody>';
 
-		<?php
 		foreach ( $this->metas as $name => $props ) {
 			$template = ( ! empty( $props['template'] ) ? $props['template'] : $this->metaDefaults['template'] );
 			$field = "{$this->prefix}_{$name}";
@@ -443,11 +426,8 @@ print_r($_POST);
 
 			printf($template, $field, $label, $value);
 		}
-		?>
 
-			</tbody>
-		</table>
-		<?php
+		echo '</tbody></table>';
 	}
 
 	/**
@@ -457,8 +437,53 @@ print_r($_POST);
 	 * @return int|false The Post.id of the new record if created successfully, false on failure.
 	 */
 	protected function new_product_post($fields) {
-		//@TODO: Write this.
-		return false;
+		//@TODO: Do any of these values need to be further sanitized?
+		$post = [
+			'post_title' => wp_strip_all_tags( $fields['title'] ),
+			'post_content' => $fields['text'],
+			'post_type' => Bpdiff::postType,
+		];
+		$post_id = wp_insert_post($post);
+		if ( $post_id instanceof WP_Error ) {
+			return false;
+		}
+
+		$meta = [
+			"{$this->prefix}_regular_price" => $fields['regular_price'],
+			"{$this->prefix}_offer_price" => $fields['offer_price'],
+			"{$this->prefix}_source_url" => $fields['source_url'],
+		];
+
+		return $this->save_meta( $post_id, $meta );
+	}
+
+	/**
+	 * Internal helper for saving meta fields related to our custom post type.
+	 *
+	 * @see Bpdiff::define_admin_hooks()
+	 * @return bool True on successful save of all meta fields, false on any failure.
+	 */
+	protected function save_meta($post_id, $data) {
+		foreach ( $this->metas as $name => $props) {
+			$key = "{$this->prefix}_{$name}";
+			$sanitizer = $this->metaDefaults['sanitizer'];
+			if( isset( $props['sanitizer'] ) && is_callable( $props['sanitizer'] ) ) {
+				$sanitizer = $props['sanitizer'];
+			}
+
+			if ( ! empty( $data[ $key ] )) {
+				$success = update_post_meta(
+					$post_id,
+					$key,
+					call_user_func($sanitizer, $data[ $key ])
+				);
+				if ( ! $success ) {
+					return false;
+				}
+			}
+		}
+
+		return true;
 	}
 
 	/**

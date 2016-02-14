@@ -25,7 +25,7 @@ Download the [latest release](https://github.com/dbeporter/wirecutter-code-chall
 
 #### Packagist
 
-@TODO: These instructions would work if the project was public and published on [Packagist](https://packagist.org).
+@TODO: These instructions require the project being public and published on [Packagist](https://packagist.org).
 
 ```sh
 composer require beporter/bp-diffbot-products ~0.0.1
@@ -43,7 +43,7 @@ or
 
 #### Wordpress Packagist
 
-@TODO: These instructions would work if the project was public and published in the [Plugins Directory](https://wordpress.org/plugins/) (and mirrored to [WordPress Packagist](http://wpackagist.org/)).
+@TODO: These instructions require the project being public and published in the [Plugins Directory](https://wordpress.org/plugins/) (and mirrored to [WordPress Packagist](http://wpackagist.org/)).
 
 If you're using Composer to manage WordPress, add this plugin to your project's dependencies. Run:
 
