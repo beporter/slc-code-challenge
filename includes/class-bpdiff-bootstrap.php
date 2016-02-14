@@ -73,7 +73,7 @@ class Bpdiff_Bootstrap {
 		);
 
 		// Registering your Custom Post Type
-		register_post_type( 'bpdiffbot-products', $args );
+		register_post_type( Bpdiff::postType, $args );
 	}
 
 	/**

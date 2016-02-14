@@ -20,28 +20,6 @@
  */
 class Bpdiff_Admin {
 	/**
-	 * Holds the values to be used in the fields callbacks.
-	 *
-	 * @var array
-	 */
-	private $options;
-
-	/**
-	 * Stores an array of internal error keys and their descriptive messages.
-	 *
-	 * Used with ::redirect_error() and ::error() to pass failures between
-	 * requests in the url.
-	 *
-	 * @var array
-	 */
-	private $errors = [
-		'no-url' => 'No product URL was provided.',
-		'bad-key' => 'The DiffBot API token stored in <strong>Settings > Product Posts</strong> is not valid.',
-		'create-post-failed' => 'Unable to create a new Product post from the returned DiffBot data.',
-		'create-post-successful' => 'New Product post created successfully.'
-	];
-
-	/**
 	 * The ID of this plugin.
 	 *
 	 * @var string
@@ -54,6 +32,79 @@ class Bpdiff_Admin {
 	 * @var string
 	 */
 	private $version;
+
+	/**
+	 * Holds the values to be used in the fields callbacks.
+	 *
+	 * @var array
+	 */
+	private $options;
+
+	/**
+	 * The prefix used for all meta fields and settings handled by this plugin.
+	 *
+	 * @var string
+	 */
+	private $prefix = 'bpdiff';
+
+	/**
+	 * Stores an array of internal error keys and their descriptive messages.
+	 *
+	 * Used with ::redirect_error() and ::error() to pass failures between
+	 * requests in the url.
+	 *
+	 * @var array
+	 */
+	private $errors = [
+		'no-url' => 'No product URL was provided.',
+		'invalid-key' => 'The DiffBot API token is not valid.',
+		'bad-key' => 'The DiffBot API token stored in <strong>Settings > Product Posts</strong> is not valid.',
+		'create-post-failed' => 'Unable to create a new Product post from the returned DiffBot data.',
+		'create-post-successful' => 'New Product post created successfully.'
+	];
+
+	/**
+	 * Default postmeta property properties. Used for formating and
+	 * sanitizing meta fields in our custom post type. These defaults
+	 * are used whenever an override is not present in ::$metas.
+	 *
+	 * @var array
+	 */
+	private $metaDefaults = [
+		'template' => '
+			<tr>
+				<th><label for="%1$s">%2$s</label></th>
+				<td><input type="text" class="large-text" id="%1$s" name="%1$s" value="%3$s" />
+			</tr>
+		',
+		'sanitizer' => 'sanitize_text_field',
+	];
+
+	/**
+	 * Defines the full set of meta properties used by the custom post type in this plugin.
+	 *
+	 * These properties are used both to render the fields and to validate them.
+	 * Keys are the non-prefixed version of the stored postmeta field names.
+	 * Each element can include (if not present, the defaults will be used):
+	 * - A "pretty" display [label] for the field.
+	 * - A sprintf() compatible formatting [template] for rendering a form input.
+	 *     %1$s = field name, %2$s = label, %3$s = value
+	 * - A callable [sanitizer] method for the field. Invoked during ::save_meta().
+	 *
+	 * @var array
+	 */
+	private $metas = [
+		'regular_price' => [
+			'label' => 'Regular Price',
+		],
+		'offer_price' => [
+			'label' => 'Offer Price',
+		],
+		'source_url' => [
+			'label' => 'Product Source URL',
+			'sanitizer' => 'esc_url_raw',
+		],
+	];
 
 	/**
 	 * Initialize the class and set its properties.
@@ -81,17 +132,17 @@ class Bpdiff_Admin {
 		// under the "Products" post type heading and replace it with our
 		// custom one:
 		//remove_submenu_page(
-		//	'edit.php?post_type=bpdiffbot-products',
-		//	'post-new.php?post_type=bpdiffbot-products'
+		//	'edit.php?post_type=' . Bpdiff::postType,
+		//	'post-new.php?post_type=' . Bpdiff::postType
 		//);
 
 		// Replace it with a custom page for submitting a URL to DiffBot.
 		add_submenu_page(
-			'edit.php?post_type=bpdiffbot-products',
+			'edit.php?post_type=' . Bpdiff::postType,
 			'Add Product Post', // page title
 			'Import from URL', // menu title
 			'publish_posts', // capability to access
-			'bpdiff-addpost', // menu slug
+			"{$this->prefix}-addpost", // menu slug
 			array( $this, 'create_addpost_page' ) // callback to render the page
 		);
 
@@ -100,7 +151,7 @@ class Bpdiff_Admin {
 			'Product Post Settings', // page title
 			'Product Posts', // menu title
 			'manage_options', // capability to access
-			'bpdiff-settings', // menu slug
+			"{$this->prefix}-settings", // menu slug
 			array( $this, 'create_setting_page' ) // callback to render the page
 		);
 	}
@@ -118,55 +169,41 @@ class Bpdiff_Admin {
 
 		// Settings page for setting/storing the DiffBot API token.
 		register_setting(
-			'bpdiff_settings',
-			'bpdiff_settings',
+			"{$this->prefix}_settings",
+			"{$this->prefix}_settings",
 			array( $this, 'sanitize_settings' )
 		);
 
 		add_settings_section(
-			'bpdiff_diffbot',
+			"{$this->prefix}_diffbot",
 			'DiffBot API Key',
 			array( $this, 'print_settings_info' ),
-			'bpdiff-settings'
+			"{$this->prefix}-settings"
 		);
 
 		add_settings_field(
 			'apikey',
 			'DiffBot API Key',
 			array( $this, 'draw_setting_apikey' ),
-			'bpdiff-settings',
-			'bpdiff_diffbot'
+			"{$this->prefix}-settings",
+			"{$this->prefix}_diffbot"
 		);
 	}
 
 	/**
-	 * Inject meta boxes into the add/edit screens for our custom Products post type.
+	 * Inject meta boxes into the add/edit screens for our custom
+	 * Products post type.
 	 *
 	 * @see Bpdiff::define_admin_hooks()
 	 * @return void
 	 */
-	public function pages_init() {
-
-		// inject meta boxes into the post editing screen.
+	public function meta_init() {
 		add_meta_box(
-			'regular_price', // unique field id
-			'Regular Price', // box title
-			[$this, 'draw_meta_regular_price'], // content callback
-			'bpdiffbot-products' // post type
+			"{$this->prefix}_products", // unique field id
+			'DiffBot Products Properties', // box title
+			[$this, 'draw_meta_box'], // content callback
+			Bpdiff::postType // post type
 		);
-//@TODO: enable after completing regular_price as a guide
-// 		add_meta_box(
-// 			'offer_price',
-// 			'Offer Price',
-// 			[$this, 'draw_meta_offer_price'],
-// 			'bpdiffbot-products'
-// 		);
-// 		add_meta_box(
-// 			'source_url',
-// 			'Source URL',
-// 			[$this, 'draw_meta_source_url'],
-// 			'bpdiffbot-products'
-// 		);
 	}
 
 	/**
@@ -180,7 +217,7 @@ class Bpdiff_Admin {
 	public function enqueue_styles() {
 		wp_enqueue_style(
 			$this->plugin_name,
-			plugin_dir_url( __FILE__ ) . 'css/bpdiff-admin.css',
+			plugin_dir_url( __FILE__ ) . "css/{$this->prefix}-admin.css",
 			array(),
 			$this->version,
 			'all'
@@ -198,11 +235,49 @@ class Bpdiff_Admin {
 	public function enqueue_scripts() {
 		wp_enqueue_script(
 			$this->plugin_name,
-			plugin_dir_url( __FILE__ ) . 'js/bpdiff-admin.js',
+			plugin_dir_url( __FILE__ ) . "js/{$this->prefix}-admin.js",
 			rray( 'jquery' ),
 			$this->version,
 			false
 		);
+	}
+
+	/**
+	 * Callback for processing meta fields unique to our custom Product
+	 * post type and saving them into the database.
+	 *
+	 * @see Bpdiff::define_admin_hooks()
+	 * @return void
+	 */
+	public function save_meta($post_id) {
+print_r($_POST);
+// die;
+		// Short circuit if there is no POST data to work on.
+		if ( empty( $_POST ) ) {
+			return;
+		}
+
+		// Short circuit if current user doesn't have access to edit posts.
+		if ( false ) {
+			return;
+		}
+
+		foreach ( $this->metas as $name => $props) {
+			$key = "{$this->prefix}_{$name}";
+			$sanitizer = $this->metaDefaults['sanitizer'];
+			if( isset( $props['sanitizer'] ) && is_callable( $props['sanitizer'] ) ) {
+				$sanitizer = $props['sanitizer'];
+			}
+// print_r($sanitizer);
+// die;
+			if ( ! empty( $_POST[ $key ] )) {
+				update_post_meta(
+					$post_id,
+					$key,
+					call_user_func($sanitizer, $_POST[ $key ])
+				);
+			}
+		}
 	}
 
 	/**
@@ -221,7 +296,7 @@ class Bpdiff_Admin {
 		}
 
 		// Spin up the DiffBot wrapper. Redirect back on failure.
-		$this->options = get_option( 'bpdiff_settings' );
+		$this->options = get_option( "{$this->prefix}_settings'" );
 		$url = $params['url'];
 		try {
 			$bot = new Bpdiff_DiffBot( $this->options['apikey'] );
@@ -239,9 +314,9 @@ class Bpdiff_Admin {
 		// Product post was created successfully. Redirect to it.
 		$params = [
 			'post' => $productPostId,
-			'post_type' => 'bpdiffbot-products',
+			'post_type' => Bpdiff::postType,
 			'action' => 'edit',
-			'bpdiff' => [
+			$this->prefix => [
 				'errors' => [ 'create-post-successful' ],
 			],
 		];
@@ -270,7 +345,7 @@ class Bpdiff_Admin {
 					<tbody>
 						<tr>
 							<th scope="row"><label for="url">URL:</label></th>
-							<td><input type="text" class="large-text" id="url" name="bpdiff[url]" value="<?php echo $url; ?>" /></td>
+							<td><input type="text" class="large-text" id="url" name="<?php echo $this->prefix; ?>[url]" value="<?php echo $url; ?>" /></td>
 						</tr>
 					</tbody>
 				</table>
@@ -288,7 +363,7 @@ class Bpdiff_Admin {
 	 * @return void
 	 */
 	public function create_setting_page() {
-		$this->options = get_option( 'bpdiff_settings' );
+		$this->options = get_option( "{$this->prefix}_settings" );
 
 		?>
 		<div class="wrap">
@@ -296,8 +371,8 @@ class Bpdiff_Admin {
 			<form method="post" action="options.php">
 			<?php
 				// This prints out all hidden setting fields
-				settings_fields( 'bpdiff_settings' );
-				do_settings_sections( 'bpdiff-settings' );
+				settings_fields( "{$this->prefix}_settings" );
+				do_settings_sections( "{$this->prefix}-settings" );
 				submit_button();
 			?>
 			</form>
@@ -318,7 +393,7 @@ class Bpdiff_Admin {
 			if ( Bpdiff_Diffbot::validateKey( $input['apikey'] ) ) {
 				$valid_input['apikey'] = trim( $input['apikey'] );
 			} else {
-				add_settings_error( $apikey, 'invalid-key', 'The provided API key is invalid.', 'error' );
+				add_settings_error( $apikey, 'invalid-key', $this->errors['invalid-key'], 'error' );
 			}
 		}
 
@@ -340,9 +415,12 @@ class Bpdiff_Admin {
 	 * @return void
 	 */
 	public function draw_setting_apikey() {
+		$key = 'apikey';
 		printf(
-			'<input type="text" class="standard-text code" id="apikey" name="bpdiff_settings[apikey]" value="%s" />',
-			isset( $this->options['apikey'] ) ? esc_attr( $this->options['apikey']) : ''
+			'<input type="text" class="standard-text code" id="%2$s" name="%1$s_settings[%2$s]" value="%3$s" />',
+			$this->prefix,
+			$key,
+			( isset( $this->options[$key] ) ? esc_attr( $this->options[$key]) : '' )
 		);
 	}
 
@@ -351,11 +429,25 @@ class Bpdiff_Admin {
 	 *
 	 * @return void
 	 */
-	public function draw_meta_regular_price($post) {
-		$template = '<input type="text" class="large-text" id="%1$s" name="%1$s" value="%2$s" />';
-		$field = 'bpdiff_regular_price';
-		$value = get_post_meta( $post->ID, $field, true );
-		printf($template, $field, $value);
+	public function draw_meta_box($post) {
+		?>
+		<table class="form-table">
+			<tbody>
+
+		<?php
+		foreach ( $this->metas as $name => $props ) {
+			$template = ( ! empty( $props['template'] ) ? $props['template'] : $this->metaDefaults['template'] );
+			$field = "{$this->prefix}_{$name}";
+			$label = ( ! empty( $props['label'] ) ? $props['label'] : $name );
+			$value = get_post_meta( $post->ID, $field, true );
+
+			printf($template, $field, $label, $value);
+		}
+		?>
+
+			</tbody>
+		</table>
+		<?php
 	}
 
 	/**
@@ -370,7 +462,7 @@ class Bpdiff_Admin {
 	}
 
 	/**
-	 * Register an admin_notice for everything in $_GET['bpdiff']['errors'].
+	 * Register an admin_notice for everything in $_GET[ $this->prefix ]['errors'].
 	 *
 	 * Called at the top of ::pages_init() to display any notices
 	 * passed from the previous page load.
@@ -421,13 +513,13 @@ class Bpdiff_Admin {
 
 	/**
 	 * Return an array of URL params unique to this plugin (in the
-	 * [bpdiff] subkey). Return empty array if none found.
+	 * [ $this->prefix ] subkey). Return empty array if none found.
 	 *
 	 * @return array Associative array of [key => value]s found in the
 	 *    current $_REQUEST (GET or POST). Empty array when nothing found.
 	 */
 	protected function get_url_params() {
-		return ( !empty( $_REQUEST['bpdiff'] ) ? (array) $_REQUEST['bpdiff'] : [] );
+		return ( !empty( $_REQUEST[ $this->prefix ] ) ? (array) $_REQUEST[ $this->prefix ] : [] );
 	}
 
 	/**
@@ -439,15 +531,15 @@ class Bpdiff_Admin {
 	 *
 	 * @param string $code The key from ::$errors indicating the failure that
 	 *    occurred. Will be used on the next page load to register an admin_notice.
-	 * @param array $params Any additional [bpdiff] URL params that should
+	 * @param array $params Any additional [ $this->prefix ] URL params that should
 	 *    be persisted to the next page load.
 	 * @return void
 	 */
 	protected function redirect($code, $params = []) {
 		$options = [
-			'post_type' => 'bpdiffbot-products',
-			'page' => 'bpdiff-addpost',
-			'bpdiff' => array_merge( [
+			'post_type' => Bpdiff::postType,
+			'page' => "{$this->prefix}-addpost",
+			$this->prefix => array_merge( [
 				'errors' => [ $code ],
 			], $params )
 		];
