@@ -322,8 +322,12 @@ class Bpdiff_Admin {
 		}
 
 		// Spin up the DiffBot wrapper. Redirect back on failure.
+		$api_key = $this->options['apikey'];
+		if ( empty( $api_key ) ) {
+			$this->redirect( 'bad-key', compact( 'url' ) );
+		}
 		try {
-			$bot = new Bpdiff_DiffBot( $this->options['apikey'] );
+			$bot = new Bpdiff_DiffBot( $api_key );
 			$result = $bot->product( esc_url_raw( $url, [ 'http', 'https' ] ) );
 		} catch ( \Exception $e ) {
 			$this->redirect( 'bad-key', compact( 'url' ) );
