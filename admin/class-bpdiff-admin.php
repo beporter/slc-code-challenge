@@ -158,14 +158,14 @@ class Bpdiff_Admin {
 		// under the "Products" post type heading and replace it with our
 		// custom one:
 		remove_submenu_page(
-			'edit.php?post_type=' . Bpdiff::postType,
-			'post-new.php?post_type=' . Bpdiff::postType
+			'edit.php?post_type=' . Bpdiff::post_type,
+			'post-new.php?post_type=' . Bpdiff::post_type
 		);
 		*/
 
 		// Replace it with a custom page for submitting a URL to DiffBot.
 		add_submenu_page(
-			'edit.php?post_type=' . Bpdiff::postType,
+			'edit.php?post_type=' . Bpdiff::post_type,
 			'Add Product Post', // Page title.
 			'Import from URL', // Menu title.
 			'publish_posts', // Capability to access.
@@ -229,7 +229,7 @@ class Bpdiff_Admin {
 			Bpdiff::prefix . "_products", // Unique field id.
 			'DiffBot Products Properties', // Box title.
 			[ $this, 'draw_meta_box' ], // Content callback.
-			Bpdiff::postType // Post type.
+			Bpdiff::post_type // Post type.
 		);
 	}
 
@@ -338,7 +338,7 @@ class Bpdiff_Admin {
 		// Product post was created successfully. Redirect to it.
 		$params = [
 			'post' => $product_post_id,
-			// 'post_type' => Bpdiff::postType,
+			// 'post_type' => Bpdiff::post_type,
 			'action' => 'edit',
 			$this->prefix => [
 				'e' => 'create-post-successful',
@@ -520,7 +520,7 @@ class Bpdiff_Admin {
 		$post = [
 			'post_title' => wp_strip_all_tags( $fields['title'] ),
 			'post_content' => $fields['text'],
-			'post_type' => Bpdiff::postType,
+			'post_type' => Bpdiff::post_type,
 		];
 		$post_id = wp_insert_post( $post );
 		if ( $post_id instanceof WP_Error ) {

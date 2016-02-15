@@ -58,7 +58,7 @@ class Bpdiff {
 	 *
 	 * @const string
 	 */
-	const postType = 'bpdiffbot-products';
+	const post_type = 'bpdiffbot-products';
 
 	/**
 	 * Define the core functionality of the plugin.
@@ -146,15 +146,15 @@ class Bpdiff {
 			[ $plugin_admin, 'scrape_product_url' ]
 		);
 		$this->loader()->add_action(
-			'save_post_' . static::postType,
+			'save_post_' . static::post_type,
 			[ $plugin_admin, 'save_meta_hook' ]
 		);
 		$this->loader()->add_action(
-			'manage_' . static::postType . '_posts_columns',
+			'manage_' . static::post_type . '_posts_columns',
 			[ $plugin_admin, 'inject_custom_columns' ]
 		);
 		$this->loader()->add_action(
-			'manage_' . static::postType . '_posts_custom_column',
+			'manage_' . static::post_type . '_posts_custom_column',
 			[ $plugin_admin, 'draw_custom_columns' ],
 			10,
 			2 // Two arguments to this method.

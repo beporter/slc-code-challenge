@@ -74,7 +74,7 @@ class Bpdiff_Bootstrap {
 		];
 
 		// Registering your Custom Post Type.
-		register_post_type( Bpdiff::postType, $args );
+		register_post_type( Bpdiff::post_type, $args );
 	}
 
 	/**
