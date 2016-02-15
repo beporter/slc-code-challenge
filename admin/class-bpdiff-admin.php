@@ -293,20 +293,20 @@ class Bpdiff_Admin {
 
 		// Attempt to create the new Product post. Redirect back on failure.
 		$productPostId = $this->new_product_post( $result );
-		if ( ! $productPostId ) {
+		if ( false === $productPostId ) {
 			$this->redirect( 'create-post-failed', compact('url') );
 		}
 
 		// Product post was created successfully. Redirect to it.
 		$params = [
 			'post' => $productPostId,
-			'post_type' => Bpdiff::postType,
+			//'post_type' => Bpdiff::postType,
 			'action' => 'edit',
 			$this->prefix => [
 				'errors' => [ 'create-post-successful' ],
 			],
 		];
-		wp_redirect( '/wp-admin/edit.php?' . http_build_query( $params ) );
+		wp_redirect( '/wp-admin/post.php?' . http_build_query( $params ) );
 		exit;
 	}
 
@@ -437,6 +437,7 @@ class Bpdiff_Admin {
 	 * @return int|false The Post.id of the new record if created successfully, false on failure.
 	 */
 	protected function new_product_post($fields) {
+		// Create the new Post record.
 		//@TODO: Do any of these values need to be further sanitized?
 		$post = [
 			'post_title' => wp_strip_all_tags( $fields['title'] ),
@@ -448,13 +449,18 @@ class Bpdiff_Admin {
 			return false;
 		}
 
+		// Save the associated meta fields.
 		$meta = [
-			"{$this->prefix}_regular_price" => $fields['regular_price'],
-			"{$this->prefix}_offer_price" => $fields['offer_price'],
-			"{$this->prefix}_source_url" => $fields['source_url'],
+			"{$this->prefix}_regular_price" => $fields['regularPrice'],
+			"{$this->prefix}_offer_price" => $fields['offerPrice'],
+			"{$this->prefix}_source_url" => $fields['pageUrl'],
 		];
+		if ( $this->save_meta( $post_id, $meta ) ) {
+			return false;
+		}
 
-		return $this->save_meta( $post_id, $meta );
+		// Return the post ID to redirect to.
+		return $post_id;
 	}
 
 	/**

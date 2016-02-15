@@ -86,9 +86,6 @@ class Bpdiff {
 	 * @return void
 	 */
 	private function load_dependencies() {
-		// Import the Composer autoloader via our shim.
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'autoload.php';
-
 		// The class responsible common initialization routines.
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-bpdiff-bootstrap.php';
 
