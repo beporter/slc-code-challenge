@@ -169,7 +169,7 @@ class Bpdiff_Admin {
 			'Add Product Post', // Page title.
 			'Import from URL', // Menu title.
 			'publish_posts', // Capability to access.
-			Bpdiff::prefix . "-addpost", // Menu slug.
+			Bpdiff::prefix . '-addpost', // Menu slug.
 			[ $this, 'create_addpost_page' ] // Callback to render the page.
 		);
 
@@ -178,7 +178,7 @@ class Bpdiff_Admin {
 			'Product Post Settings',
 			'Product Posts',
 			'manage_options',
-			Bpdiff::prefix . "-settings",
+			Bpdiff::prefix . '-settings',
 			[ $this, 'create_setting_page' ]
 		);
 	}
@@ -196,24 +196,24 @@ class Bpdiff_Admin {
 
 		// Settings page for setting/storing the DiffBot API token.
 		register_setting(
-			Bpdiff::prefix . "_settings",
-			Bpdiff::prefix . "_settings",
+			Bpdiff::prefix . '_settings',
+			Bpdiff::prefix . '_settings',
 			array( $this, 'sanitize_settings' )
 		);
 
 		add_settings_section(
-			Bpdiff::prefix . "_diffbot",
+			Bpdiff::prefix . '_diffbot',
 			'DiffBot API Key',
 			array( $this, 'print_settings_info' ),
-			Bpdiff::prefix . "-settings"
+			Bpdiff::prefix . '-settings'
 		);
 
 		add_settings_field(
 			'apikey',
 			'DiffBot API Key',
 			array( $this, 'draw_setting_apikey' ),
-			Bpdiff::prefix . "-settings",
-			Bpdiff::prefix . "_diffbot"
+			Bpdiff::prefix . '-settings',
+			Bpdiff::prefix . '_diffbot'
 		);
 	}
 
@@ -226,7 +226,7 @@ class Bpdiff_Admin {
 	 */
 	public function meta_init() {
 		add_meta_box(
-			Bpdiff::prefix . "_products", // Unique field id.
+			Bpdiff::prefix . '_products', // Unique field id.
 			'DiffBot Products Properties', // Box title.
 			[ $this, 'draw_meta_box' ], // Content callback.
 			Bpdiff::post_type // Post type.
@@ -315,7 +315,7 @@ class Bpdiff_Admin {
 		// Validate the URL provided to the best of our ability.
 		// esc_url_raw() doesn't cut it here by itself (try entering
 		// "bad url" and see), so we use that only as the second stage later.
-		$this->options = get_option( Bpdiff::prefix . "_settings" );
+		$this->options = get_option( Bpdiff::prefix . '_settings' );
 		$url = $params['url'];
 		if ( ! filter_var( $url, FILTER_VALIDATE_URL ) ) {
 			$this->redirect( 'bad-url' );
@@ -391,15 +391,15 @@ class Bpdiff_Admin {
 	 * @return void
 	 */
 	public function create_setting_page() {
-		$this->options = get_option( Bpdiff::prefix . "_settings" );
+		$this->options = get_option( Bpdiff::prefix . '_settings' );
 
 		?>
 		<div class="wrap">
 			<h2>DiffBot Product API Configuration</h2>
 			<form method="post" action="options.php">
 			<?php
-				settings_fields( Bpdiff::prefix . "_settings" );
-				do_settings_sections( Bpdiff::prefix . "-settings" );
+				settings_fields( Bpdiff::prefix . '_settings' );
+				do_settings_sections( Bpdiff::prefix . '-settings' );
 				submit_button();
 			?>
 			</form>
@@ -673,7 +673,7 @@ class Bpdiff_Admin {
 		);
 		$options = [
 			'post_type' => Bpdiff::post_type,
-			'page' => Bpdiff::prefix . "-addpost",
+			'page' => Bpdiff::prefix . '-addpost',
 			$this->prefix => $nested,
 		];
 
