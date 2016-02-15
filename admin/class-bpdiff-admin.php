@@ -50,18 +50,32 @@ class Bpdiff_Admin {
 	/**
 	 * Stores an array of internal error keys and their descriptive messages.
 	 *
-	 * Used with ::redirect_error() and ::error() to pass failures between
-	 * requests in the url.
+	 * Used with ::redirect_error() and ::error() to pass failures and messages between
+	 * requests in the url. When set, [type] must be one of 'error', 'updated',
+	 * 'update-nag'. (Default is `error`.)
 	 *
 	 * @var array
 	 */
 	private $errors = [
-		'no-url' => 'No product URL was provided.',
-		'invalid-key' => 'The DiffBot API token is not valid.',
-		'bad-key' => 'The DiffBot API token stored in <strong>Settings > Product Posts</strong> is not valid.',
-		'no-privs' => 'Insufficient access.',
-		'create-post-failed' => 'Unable to create a new Product post from the returned DiffBot data.',
-		'create-post-successful' => 'New Product post created successfully.'
+		'no-url' => [
+			'msg' => 'No product URL was provided.',
+		],
+		'invalid-key' => [
+			'msg' => 'The DiffBot API token is not valid.',
+		],
+		'bad-key' => [
+			'msg' => 'The DiffBot API token stored in <strong>Settings > Product Posts</strong> is not valid.',
+		],
+		'no-privs' => [
+			'msg' => 'Insufficient access.',
+		],
+		'create-post-failed' => [
+			'msg' => 'Unable to create a new Product post from the returned DiffBot data.',
+		],
+		'create-post-successful' => [
+			'msg' => 'New Product post created successfully.',
+			'type' => 'updated',
+		],
 	];
 
 	/**
@@ -91,19 +105,26 @@ class Bpdiff_Admin {
 	 * - A sprintf() compatible formatting [template] for rendering a form input.
 	 *     %1$s = field name, %2$s = label, %3$s = value
 	 * - A callable [sanitizer] method for the field. Invoked during ::save_meta().
+	 * - Whether the column should be displayed in the Products index table.
+	 * - The name of the field returned from the API call to retrieve for this meta property.
 	 *
 	 * @var array
 	 */
 	private $metas = [
 		'regular_price' => [
 			'label' => 'Regular Price',
+			'column' => true,
+			'api_field' => 'regularPrice',
 		],
 		'offer_price' => [
 			'label' => 'Offer Price',
+			'column' => true,
+			'api_field' => 'offerPrice',
 		],
 		'source_url' => [
 			'label' => 'Product Source URL',
 			'sanitizer' => 'esc_url_raw',
+			'api_field' => 'pageUrl',
 		],
 	];
 
@@ -324,7 +345,7 @@ class Bpdiff_Admin {
 		?>
 		<div class="wrap">
 			<h2>Add Product Post</h2>
-			<p>Paste a product URL below to have the <a href="https://www.diffbot.com">DiffBot</a> service scrape a product page from a remote site and create a new Product Post in WordPress:</p>
+			<p>Paste a product URL below to have the <a href="https://www.diffbot.com">DiffBot</a> service scrape a product page from a remote site and create a new Product Post in WordPress. DiffBot may take up to a minute to return results, so please be patient.</p>
 			<form method="post" action="admin-post.php">
 				<input type="hidden" name="action" value="scrape_product_url">
 				<table class="form-table">
@@ -364,6 +385,39 @@ class Bpdiff_Admin {
 			</form>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Callback to inject custom columns into a Products index.
+	 *
+	 * @return void
+	 */
+	public function inject_custom_columns($columns) {
+		$date = $columns['date'];
+		unset( $columns['date'] );
+
+		foreach ( $this->metas as $name => $props ) {
+			if ( isset( $props['column'] ) && true === $props['column']) {
+				$columns[ "{$name}" ] = $props['label'];
+			}
+		}
+
+		$columns['date'] = $date;
+
+		return $columns;
+	}
+
+	/**
+	 * Callback to render custom columns into a row in Products listings.
+	 *
+	 * @return void
+	 */
+	public function draw_custom_columns($column, $post_id) {
+		if ( isset( $this->metas[ $column ]['column'] )
+			&& true === $this->metas[ $column ]['column']
+		) {
+			echo get_post_meta( $post_id, "{$this->prefix}_{$column}", true );
+		}
 	}
 
 	/**
@@ -450,12 +504,13 @@ class Bpdiff_Admin {
 		}
 
 		// Save the associated meta fields.
-		$meta = [
-			"{$this->prefix}_regular_price" => $fields['regularPrice'],
-			"{$this->prefix}_offer_price" => $fields['offerPrice'],
-			"{$this->prefix}_source_url" => $fields['pageUrl'],
-		];
-		if ( $this->save_meta( $post_id, $meta ) ) {
+		$meta = [];
+		foreach ( $this->metas as $name => $props ) {
+			if ( ! empty( $props['api_field'] ) ) {
+				$meta[ "{$this->prefix}_{$name}" ] = $fields[ $props['api_field'] ];
+			}
+		}
+		if ( ! $this->save_meta( $post_id, $meta ) ) {
 			return false;
 		}
 
@@ -478,10 +533,11 @@ class Bpdiff_Admin {
 			}
 
 			if ( ! empty( $data[ $key ] )) {
+				$value = call_user_func($sanitizer, $data[ $key ]);
 				$success = update_post_meta(
 					$post_id,
 					$key,
-					call_user_func($sanitizer, $data[ $key ])
+					$value
 				);
 				if ( ! $success ) {
 					return false;
@@ -515,11 +571,10 @@ class Bpdiff_Admin {
 	 * This message will be displayed at the top of the admin page.
 	 *
 	 * @param string $key The key from ::$errors for which to return a message.
-	 * @param string $type One of 'error', 'updated', 'update-nag'.
 	 * @return void
 	 */
-	protected function add_notice($key, $type = 'error') {
-		$msg = $this->format_notice($key, $type);
+	protected function add_notice($key) {
+		$msg = $this->format_notice( $key );
 
 		add_action(
 			'admin_notices',
@@ -533,13 +588,15 @@ class Bpdiff_Admin {
 	 * Format an internal error for rendering in the admin interface via admin_notices.
 	 *
 	 * @param string $key The key from ::$errors for which to return a message.
-	 * @param string $type One of 'error', 'updated', 'update-nag'.
 	 * @return string A formatted HTML admin error/notice message.
 	 */
-	protected function format_notice($key, $type) {
-		$msg = $this->errors[ $key ];
-		$class = $type;
-		return "<div class=\"{$class}\"> <p>{$msg}</p></div>";
+	protected function format_notice($key) {
+		$err = $this->errors[ $key ];
+		return sprintf(
+			'<div class="%1$s"> <p>%2$s</p></div>',
+			( isset( $err['type'] ) ? $err['type'] : 'error' ),
+			$err['msg']
+		);
 	}
 
 	/**
@@ -550,7 +607,7 @@ class Bpdiff_Admin {
 	 *    current $_REQUEST (GET or POST). Empty array when nothing found.
 	 */
 	protected function get_url_params() {
-		return ( !empty( $_REQUEST[ $this->prefix ] ) ? (array) $_REQUEST[ $this->prefix ] : [] );
+		return ( ! empty( $_REQUEST[ $this->prefix ] ) ? (array) $_REQUEST[ $this->prefix ] : [] );
 	}
 
 	/**

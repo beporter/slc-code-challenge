@@ -119,7 +119,20 @@ class Bpdiff {
 		$this->loader()->add_action( 'admin_menu', [$plugin_admin, 'add_plugin_pages'] );
 		$this->loader()->add_action( 'add_meta_boxes', [$plugin_admin, 'meta_init'] );
 		$this->loader()->add_action( 'admin_post_scrape_product_url', [$plugin_admin, 'scrape_product_url'] );
-		$this->loader()->add_action( 'save_post_' . static::postType, [$plugin_admin, 'save_meta_hook'] );
+		$this->loader()->add_action(
+			'save_post_' . static::postType,
+			[$plugin_admin, 'save_meta_hook']
+		);
+		$this->loader()->add_action(
+			'manage_' . static::postType . '_posts_columns',
+			[$plugin_admin, 'inject_custom_columns']
+		);
+		$this->loader()->add_action(
+			'manage_' . static::postType . '_posts_custom_column',
+			[$plugin_admin, 'draw_custom_columns'],
+			10,
+			2 // two arguments to this method
+		);
 	}
 
 	/**
