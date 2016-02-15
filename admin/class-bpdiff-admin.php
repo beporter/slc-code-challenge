@@ -374,7 +374,7 @@ class Bpdiff_Admin {
 					</tbody>
 				</table>
 				<p class="submit">
-					<input type="submit" name="submit" id="submit" class="button button-primary" value="Import Product Page">
+					<input type="submit" name="submit" id="submit" class="button button-primary" value="Import Product Page from URL">
 				</p>
 			</form>
 		</div>
