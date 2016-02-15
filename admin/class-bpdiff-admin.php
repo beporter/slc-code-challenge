@@ -341,7 +341,7 @@ class Bpdiff_Admin {
 			// 'post_type' => Bpdiff::postType,
 			'action' => 'edit',
 			$this->prefix => [
-				'errors' => [ 'create-post-successful' ],
+				'e' => 'create-post-successful',
 			],
 		];
 		wp_redirect( '/wp-admin/post.php?' . http_build_query( $params ) );
@@ -452,7 +452,9 @@ class Bpdiff_Admin {
 			if ( Bpdiff_Diffbot::validate_key( $input['apikey'] ) ) {
 				$valid_input['apikey'] = trim( $input['apikey'] );
 			} else {
-				add_settings_error( $apikey, 'invalid-key', $this->errors['invalid-key'], 'error' );
+				$err = $this->errors['invalid-key'];
+				$type = ( isset( $err['type'] ) ? $err['type'] : 'error' );
+				add_settings_error( $apikey, 'invalid-key', $err['msg'], $type );
 			}
 		}
 
@@ -515,7 +517,6 @@ class Bpdiff_Admin {
 	 */
 	protected function new_product_post( $fields ) {
 		// Create the new Post record.
-		// @TODO: Do any of these values need to be further sanitized?
 		$post = [
 			'post_title' => wp_strip_all_tags( $fields['title'] ),
 			'post_content' => $fields['text'],
@@ -574,7 +575,7 @@ class Bpdiff_Admin {
 	}
 
 	/**
-	 * Register an admin_notice for everything in $_GET[ $this->prefix ]['errors'].
+	 * Register an admin_notice for everything in $_GET[ $this->prefix ]['e'].
 	 *
 	 * Called at the top of ::pages_init() to display any notices
 	 * passed from the previous page load.
@@ -583,7 +584,7 @@ class Bpdiff_Admin {
 	 */
 	protected function register_notices() {
 		$params = $this->get_url_params();
-		$notices = ( ! empty( $params['errors'] ) ? (array) $params['errors'] : [] );
+		$notices = ( ! empty( $params['e'] ) ? (array) $params['e'] : [] );
 
 		foreach ( $notices as $notice ) {
 			$this->add_notice( $notice );
@@ -638,7 +639,7 @@ class Bpdiff_Admin {
 	protected function get_url_params() {
 		// @codingStandardsIgnoreStart
 		if ( ! empty( $_REQUEST[ $this->prefix ] ) ) {
-			$prefixed_params = (array) sanitize_key( $_REQUEST[ $this->prefix ] );
+			$prefixed_params = (array) $_REQUEST[ $this->prefix ] ;
 		// @codingStandardsIgnoreEnd
 		} else {
 			$prefixed_params = [];
@@ -662,7 +663,7 @@ class Bpdiff_Admin {
 	protected function redirect( $code, $params = [] ) {
 		$nested = array_merge(
 			[
-				'errors' => [ $code ],
+				'e' => $code,
 			],
 			$params
 		);
