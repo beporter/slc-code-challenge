@@ -53,6 +53,10 @@ class Bpdiff_Diffbot {
 	 * @return bool True when the token is found to be valid and active, false on any failure.
 	 */
 	public static function validate_key( $key ) {
+		if ( empty( $key ) ) {
+			return false;
+		}
+
 		try {
 			$bot = new static( $key );
 		} catch ( \Exception $e ) {
