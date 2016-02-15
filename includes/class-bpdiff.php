@@ -45,6 +45,15 @@ class Bpdiff {
 	protected $version = '0.0.1';
 
 	/**
+	 * The short prefix used interally by this plugin.
+	 *
+	 * The prefix is used for all meta fields and settings handled by this plugin.
+	 *
+	 * @const string
+	 */
+	const prefix = 'bpdiff';
+
+	/**
 	 * The custom Post type generated and managed by this plugin.
 	 *
 	 * @const string

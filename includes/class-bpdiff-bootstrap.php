@@ -38,24 +38,24 @@ class Bpdiff_Bootstrap {
 	public static function init() {
 		// Set UI labels for Custom Post Type.
 		$labels = [
-			'name'                => _x( 'Products', 'Post Type General Name', 'twentythirteen' ),
-			'singular_name'       => _x( 'Product', 'Post Type Singular Name', 'twentythirteen' ),
-			'menu_name'           => __( 'Products', 'twentythirteen' ),
-			'all_items'           => __( 'All Products', 'twentythirteen' ),
-			'view_item'           => __( 'View Product', 'twentythirteen' ),
-			'add_new_item'        => __( 'Add New Product', 'twentythirteen' ),
-			'add_new'             => __( 'Add New', 'twentythirteen' ),
-			'edit_item'           => __( 'Edit Product', 'twentythirteen' ),
-			'update_item'         => __( 'Update Product', 'twentythirteen' ),
-			'search_items'        => __( 'Search Product', 'twentythirteen' ),
-			'not_found'           => __( 'Not Found', 'twentythirteen' ),
-			'not_found_in_trash'  => __( 'Not found in Trash', 'twentythirteen' ),
+			'name'                => _x( 'Products', 'Post Type General Name', Bpdiff::prefix ),
+			'singular_name'       => _x( 'Product', 'Post Type Singular Name', Bpdiff::prefix ),
+			'menu_name'           => __( 'Products', Bpdiff::prefix ),
+			'all_items'           => __( 'All Products', Bpdiff::prefix ),
+			'view_item'           => __( 'View Product', Bpdiff::prefix ),
+			'add_new_item'        => __( 'Add New Product', Bpdiff::prefix ),
+			'add_new'             => __( 'Add New', Bpdiff::prefix ),
+			'edit_item'           => __( 'Edit Product', Bpdiff::prefix ),
+			'update_item'         => __( 'Update Product', Bpdiff::prefix ),
+			'search_items'        => __( 'Search Product', Bpdiff::prefix ),
+			'not_found'           => __( 'Not Found', Bpdiff::prefix ),
+			'not_found_in_trash'  => __( 'Not found in Trash', Bpdiff::prefix ),
 		];
 
 		// Set other options for Custom Post Type.
 		$args = [
-			'label'               => __( 'products', 'twentythirteen' ),
-			'description'         => __( 'Product information', 'twentythirteen' ),
+			'label'               => __( 'products', Bpdiff::prefix ),
+			'description'         => __( 'Product information', Bpdiff::prefix ),
 			'labels'              => $labels,
 			'rewrite'             => [ 'slug' => 'products' ], // @TODO: should proably be configurable in the Admin UI.
 			'hierarchical'        => false,

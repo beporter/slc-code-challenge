@@ -169,7 +169,7 @@ class Bpdiff_Admin {
 			'Add Product Post', // Page title.
 			'Import from URL', // Menu title.
 			'publish_posts', // Capability to access.
-			"{$this->prefix}-addpost", // Menu slug.
+			Bpdiff::prefix . "-addpost", // Menu slug.
 			[ $this, 'create_addpost_page' ] // Callback to render the page.
 		);
 
@@ -178,7 +178,7 @@ class Bpdiff_Admin {
 			'Product Post Settings',
 			'Product Posts',
 			'manage_options',
-			"{$this->prefix}-settings",
+			Bpdiff::prefix . "-settings",
 			[ $this, 'create_setting_page' ]
 		);
 	}
@@ -196,24 +196,24 @@ class Bpdiff_Admin {
 
 		// Settings page for setting/storing the DiffBot API token.
 		register_setting(
-			"{$this->prefix}_settings",
-			"{$this->prefix}_settings",
+			Bpdiff::prefix . "_settings",
+			Bpdiff::prefix . "_settings",
 			array( $this, 'sanitize_settings' )
 		);
 
 		add_settings_section(
-			"{$this->prefix}_diffbot",
+			Bpdiff::prefix . "_diffbot",
 			'DiffBot API Key',
 			array( $this, 'print_settings_info' ),
-			"{$this->prefix}-settings"
+			Bpdiff::prefix . "-settings"
 		);
 
 		add_settings_field(
 			'apikey',
 			'DiffBot API Key',
 			array( $this, 'draw_setting_apikey' ),
-			"{$this->prefix}-settings",
-			"{$this->prefix}_diffbot"
+			Bpdiff::prefix . "-settings",
+			Bpdiff::prefix . "_diffbot"
 		);
 	}
 
@@ -226,7 +226,7 @@ class Bpdiff_Admin {
 	 */
 	public function meta_init() {
 		add_meta_box(
-			"{$this->prefix}_products", // Unique field id.
+			Bpdiff::prefix . "_products", // Unique field id.
 			'DiffBot Products Properties', // Box title.
 			[ $this, 'draw_meta_box' ], // Content callback.
 			Bpdiff::postType // Post type.
@@ -315,7 +315,7 @@ class Bpdiff_Admin {
 		// Validate the URL provided to the best of our ability.
 		// esc_url_raw() doesn't cut it here by itself (try entering
 		// "bad url" and see), so we use that only as the second stage later.
-		$this->options = get_option( "{$this->prefix}_settings" );
+		$this->options = get_option( Bpdiff::prefix . "_settings" );
 		$url = $params['url'];
 		if ( ! filter_var( $url, FILTER_VALIDATE_URL ) ) {
 			$this->redirect( 'bad-url' );
@@ -387,15 +387,15 @@ class Bpdiff_Admin {
 	 * @return void
 	 */
 	public function create_setting_page() {
-		$this->options = get_option( "{$this->prefix}_settings" );
+		$this->options = get_option( Bpdiff::prefix . "_settings" );
 
 		?>
 		<div class="wrap">
 			<h2>DiffBot Product API Configuration</h2>
 			<form method="post" action="options.php">
 			<?php
-				settings_fields( "{$this->prefix}_settings" );
-				do_settings_sections( "{$this->prefix}-settings" );
+				settings_fields( Bpdiff::prefix . "_settings" );
+				do_settings_sections( Bpdiff::prefix . "-settings" );
 				submit_button();
 			?>
 			</form>
@@ -435,7 +435,7 @@ class Bpdiff_Admin {
 		if ( isset( $this->metas[ $column ]['column'] )
 			&& true === $this->metas[ $column ]['column']
 		) {
-			echo esc_attr( get_post_meta( $post_id, sanitize_key( "{$this->prefix}_{$column}" ), true ) );
+			echo esc_attr( get_post_meta( $post_id, sanitize_key( Bpdiff::prefix . "_{$column}" ), true ) );
 		}
 	}
 
@@ -497,7 +497,7 @@ class Bpdiff_Admin {
 
 		foreach ( $this->metas as $name => $props ) {
 			$template = ( ! empty( $props['template'] ) ? $props['template'] : $this->meta_defaults['template'] );
-			$field = "{$this->prefix}_{$name}";
+			$field = Bpdiff::prefix . "_{$name}";
 			$label = ( ! empty( $props['label'] ) ? $props['label'] : $name );
 			$value = get_post_meta( $post->ID, $field, true );
 
@@ -531,7 +531,7 @@ class Bpdiff_Admin {
 		$meta = [];
 		foreach ( $this->metas as $name => $props ) {
 			if ( ! empty( $props['api_field'] ) ) {
-				$meta[ "{$this->prefix}_{$name}" ] = $fields[ $props['api_field'] ];
+				$meta[ Bpdiff::prefix . "_{$name}" ] = $fields[ $props['api_field'] ];
 			}
 		}
 		if ( ! $this->save_meta( $post_id, $meta ) ) {
@@ -552,7 +552,7 @@ class Bpdiff_Admin {
 	 */
 	protected function save_meta( $post_id, $data ) {
 		foreach ( $this->metas as $name => $props ) {
-			$key = "{$this->prefix}_{$name}";
+			$key = Bpdiff::prefix . "_{$name}";
 			$sanitizer = $this->meta_defaults['sanitizer'];
 			if ( isset( $props['sanitizer'] ) && is_callable( $props['sanitizer'] ) ) {
 				$sanitizer = $props['sanitizer'];
@@ -668,8 +668,8 @@ class Bpdiff_Admin {
 			$params
 		);
 		$options = [
-			'post_type' => Bpdiff::postType,
-			'page' => "{$this->prefix}-addpost",
+			'post_type' => Bpdiff::post_type,
+			'page' => Bpdiff::prefix . "-addpost",
 			$this->prefix => $nested,
 		];
 
