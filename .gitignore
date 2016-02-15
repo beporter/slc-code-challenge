@@ -21,6 +21,7 @@ wp-content/plugins/hello.php
 /vendor
 /.vagrant
 /.puli
+/wpcs
 
 # Numerous always-ignore extensions
 *.diff

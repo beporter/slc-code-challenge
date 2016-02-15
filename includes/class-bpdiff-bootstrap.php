@@ -36,8 +36,8 @@ class Bpdiff_Bootstrap {
 	 * @return void
 	 */
 	public static function init() {
-		// Set UI labels for Custom Post Type
-		$labels = array(
+		// Set UI labels for Custom Post Type.
+		$labels = [
 			'name'                => _x( 'Products', 'Post Type General Name', 'twentythirteen' ),
 			'singular_name'       => _x( 'Product', 'Post Type Singular Name', 'twentythirteen' ),
 			'menu_name'           => __( 'Products', 'twentythirteen' ),
@@ -50,14 +50,14 @@ class Bpdiff_Bootstrap {
 			'search_items'        => __( 'Search Product', 'twentythirteen' ),
 			'not_found'           => __( 'Not Found', 'twentythirteen' ),
 			'not_found_in_trash'  => __( 'Not found in Trash', 'twentythirteen' ),
-		);
+		];
 
-		// Set other options for Custom Post Type
-		$args = array(
+		// Set other options for Custom Post Type.
+		$args = [
 			'label'               => __( 'products', 'twentythirteen' ),
 			'description'         => __( 'Product information', 'twentythirteen' ),
 			'labels'              => $labels,
-			'rewrite'             => array('slug' => 'products'), //@TODO: should proably be configurable in the Admin UI.
+			'rewrite'             => [ 'slug' => 'products' ], // @TODO: should proably be configurable in the Admin UI.
 			'hierarchical'        => false,
 			'public'              => true,
 			'show_ui'             => true,
@@ -70,22 +70,22 @@ class Bpdiff_Bootstrap {
 			'exclude_from_search' => false,
 			'publicly_queryable'  => true,
 			'capability_type'     => 'post',
-		);
+		];
 
-		// Registering your Custom Post Type
+		// Registering your Custom Post Type.
 		register_post_type( Bpdiff::postType, $args );
 	}
 
 	/**
 	 * Deactivation hook.
 	 *
-	 * Executed when plugin is deactivated. Update site settings to remove dependencies on the plugin.
+	 * Executed when plugin is deactivated. Update site settings to remove
+	 * dependencies on the plugin.
 	 *
 	 * @return void
 	 */
 	public static function deactivate() {
 		// (Product post type automatically removed.)
-
 		// Clear permalinks to remove `product` post type rules.
 		flush_rewrite_rules();
 	}
@@ -93,7 +93,8 @@ class Bpdiff_Bootstrap {
 	/**
 	 * Uninstall hook.
 	 *
-	 * Executed when (deactivated) plugin is deleted. Clean up custom options, db tables.
+	 * Executed when (deactivated) plugin is deleted. Clean up custom
+	 * options, db tables.
 	 *
 	 * @return void
 	 */

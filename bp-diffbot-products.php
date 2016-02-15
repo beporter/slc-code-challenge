@@ -29,18 +29,24 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
- * Register plugin bootstrapping callbacks that are only needed for install/uninstall.
+ * Register plugin activation callback.
  */
 function bpdiff_activate() {
 	require_once plugin_dir_path( __FILE__ ) . 'includes/class-bpdiff-bootstrap.php';
 	Bpdiff_Bootstrap::activate();
 }
 
+/**
+ * Register plugin deactivation callback.
+ */
 function bpdiff_deactivate() {
 	require_once plugin_dir_path( __FILE__ ) . 'includes/class-bpdiff-bootstrap.php';
 	Bpdiff_Bootstrap::deactivate();
 }
 
+/**
+ * Register plugin uninstall callback.
+ */
 function bpdiff_uninstall() {
 	require_once plugin_dir_path( __FILE__ ) . 'includes/class-bpdiff-bootstrap.php';
 	Bpdiff_Bootstrap::uninstall();
@@ -61,6 +67,10 @@ register_uninstall_hook( __FILE__, 'bpdiff_uninstall' );
  * not affect the page life cycle.
  */
 require plugin_dir_path( __FILE__ ) . 'includes/class-bpdiff.php';
+
+/**
+ * Wrap up plugin launch.
+ */
 function run_bpdiff() {
 	$plugin = new Bpdiff();
 	$plugin->run();

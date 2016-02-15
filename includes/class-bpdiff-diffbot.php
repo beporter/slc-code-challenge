@@ -39,18 +39,20 @@ class Bpdiff_Diffbot {
 	 * @param string $key The DiffBot token to use with all requests to the API.
 	 * @return void
 	 */
-	public function __construct($key) {
+	public function __construct( $key ) {
 		$this->key = $key;
 		$this->bot = new diffbot( $key, 3 );
 	}
 
 	/**
-	 * Spawns a one-off instance and hits the Account API endpoint to validate the API key provided is valid and active. Returns true if the key is valid and can be used, false on failure.
+	 * Spawns a one-off instance and hits the Account API endpoint to
+	 * validate the API key provided is valid and active. Returns true
+	 * if the key is valid and can be used, false on failure.
 	 *
 	 * @param string $key The DiffBot token to use with all requests to the API.
-	 * @return void
+	 * @return bool True when the token is found to be valid and active, false on any failure.
 	 */
-	public static function validateKey($key) {
+	public static function validate_key( $key ) {
 		try {
 			$bot = new static( $key );
 		} catch ( \Exception $e ) {
@@ -58,7 +60,7 @@ class Bpdiff_Diffbot {
 		}
 
 		$account = $bot->account();
-		return ( $account['status'] === 'active' );
+		return ( 'active' === $account['status'] );
 	}
 
 	/**
@@ -68,20 +70,20 @@ class Bpdiff_Diffbot {
 	 */
 	public function account() {
 		$results = $this->bot->account();
-		return $this->mapAccountFields($results);
+		return $this->map_account_fields( $results );
 	}
 
 	/**
 	 * Fetch API results for a Product APi request against a public URL and
 	 * return the first result.
 	 *
-	 * @param string $url The public URL the DiffBot API should scrape for product information
+	 * @param string $url The public URL the DiffBot API should scrape for product information.
 	 * @return object
 	 */
-	public function product($url) {
+	public function product( $url ) {
 		$fields = [];
 		$results = $this->bot->product( $url, $fields );
-		return $this->mapProductFields($results->objects[0]);
+		return $this->map_product_fields( $results->objects[0] );
 	}
 
 	/**
@@ -90,30 +92,48 @@ class Bpdiff_Diffbot {
 	 * type. This completely hides the details of the API results from
 	 * the WP plugin.
 	 *
-	 * @param string $url The public URL the DiffBot API should scrape for product information
-	 * @return object
+	 * @param string $account The returned json_decode()d account object.
+	 * @return array An associative array of mapped account fields.
 	 */
-	protected function mapAccountFields($account) {
+	protected function map_account_fields( $account ) {
 		return [
 			'name' => $account->name,
 			'email' => $account->email,
 			'plan' => $account->plan,
+			// @codingStandardsIgnoreStart
 			'planCalls' => $account->planCalls,
+			// @codingStandardsIgnoreEnd
 			'status' => $account->status,
 		];
 	}
 
 	/**
-	 * Converts the custom Entity returned by the API into a plain
+	 * Converts the object returned by the API into a plain
 	 * associative array suitable for use with the custom Products post
 	 * type. This completely hides the details of the API results from
 	 * the WP plugin.
 	 *
+	 * For now this stub is good enough. If we needed to adapt the API
+	 * result in the future, we have a place to do it.
+	 *
+	 * We have to provide some default keys to ensure they are always
+	 * present in the returned array even if they are not present in the
+	 * API response payload.
+	 *
 	 * @param object $product The returned json_decode()d product object.
-	 * @return array
+	 * @return array An associative array of mapped product fields.
 	 */
-	protected function mapProductFields($product) {
-		return (array) $product;
+	protected function map_product_fields( $product ) {
+
+		$defaults = [
+			'title' => 'No title available',
+			'text' => 'No description available.',
+			'regularPrice' => 'N/A',
+			'offerPrice' => 'N/A',
+			'pageUrl' => '',
+		];
+		return (array) $product + $defaults;
+
 	}
 
 
@@ -127,10 +147,10 @@ class Bpdiff_Diffbot {
 	 * type. This completely hides the details of the API results from
 	 * the WP plugin.
 	 *
-	 * @param \Swader\Diffbot\Entity\Product $product @TODO desc.
+	 * @param \Swader\Diffbot\Entity\Product $product The returned Product entity from which to extract values.
 	 * @return object
 	 */
-	protected function mapProductFields_oldlib(\Swader\Diffbot\Entity\Product $product) {
+	protected function map_product_fields_oldlib( \Swader\Diffbot\Entity\Product $product ) {
 		return [
 			'title' => $product->getTitle(),
 			'text' => $product->getText(),
@@ -146,21 +166,23 @@ class Bpdiff_Diffbot {
 	 * the key is valid and can be used, false on failure.
 	 *
 	 * @param string $key The DiffBot token to use with all requests to the API.
-	 * @return void
+	 * @return bool True when the token is found to be valid and active, false on any failure.
 	 */
-	public static function validateKey_oldlib($key) {
+	public static function validate_key_oldlib( $key ) {
 		try {
 			$bot = new static( $key );
 		} catch ( \Exception $e ) {
 			return false;
 		}
 
+		/*
 		// Ref: https://www.diffbot.com/dev/docs/account/
 		// This doesn't exist in the vendor lib yet. When it does, we can
 		// confirm the account for the provided key is in good standing
 		// using something like the following:
-		//$account = $bot->createAccountApi()->call();
-		//return ( $account->getStatus() === 'active' );
+		$account = $bot->createAccountApi()->call();
+		return ( $account->getStatus() === 'active' );
+		*/
 
 		return true;
 	}
@@ -169,22 +191,22 @@ class Bpdiff_Diffbot {
 	 * Fetch API results for a Product APi request against a public URL and
 	 * return the first result.
 	 *
-	 * @param string $url The public URL the DiffBot API should scrape for product information
+	 * @param string $url The public URL the DiffBot API should scrape for product information.
 	 * @return object
 	 */
-	public function product_oldlib($url) {
-		$productApi = $this->bot->createProductAPI( $url );
-		$productApi
+	public function product_oldlib( $url ) {
+		$product_api = $this->bot->createProductAPI( $url );
+		$product_api
 			->setMeta( false )
 			->setDiscussion( false )
 			->setColors( false )
-			->setSize( false)
-			->setAvailability(false);
+			->setSize( false )
+			->setAvailability( false );
 
 		// Results from call() are always an iterable collection.
 		// We only care about the first result.
-		$results = $productApi->call()->current();
+		$results = $product_api->call()->current();
 
-		return $this->mapProductFields($results);
+		return $this->map_product_fields( $results );
 	}
 }

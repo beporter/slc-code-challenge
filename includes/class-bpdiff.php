@@ -110,28 +110,45 @@ class Bpdiff {
 	private function define_admin_hooks() {
 		$plugin_admin = new Bpdiff_Admin( $this->get_plugin_name(), $this->get_version() );
 
+		/*
 		// We currently have no styles or scripts to load.
-		//$this->loader()->add_action( 'admin_enqueue_scripts', [$plugin_admin, 'enqueue_styles'] );
-		//$this->loader()->add_action( 'admin_enqueue_scripts', [$plugin_admin, 'enqueue_scripts'] );
+		$this->loader()->add_action( 'admin_enqueue_scripts', [ $plugin_admin, 'enqueue_styles' ] );
+		$this->loader()->add_action( 'admin_enqueue_scripts', [ $plugin_admin, 'enqueue_scripts' ] );
+		*/
 
-		$this->loader()->add_action( 'init', ['Bpdiff_Bootstrap', 'init'] );
-		$this->loader()->add_action( 'admin_init', [$plugin_admin, 'pages_init'] );
-		$this->loader()->add_action( 'admin_menu', [$plugin_admin, 'add_plugin_pages'] );
-		$this->loader()->add_action( 'add_meta_boxes', [$plugin_admin, 'meta_init'] );
-		$this->loader()->add_action( 'admin_post_scrape_product_url', [$plugin_admin, 'scrape_product_url'] );
+		$this->loader()->add_action(
+			'init',
+			[ 'Bpdiff_Bootstrap', 'init' ]
+		);
+		$this->loader()->add_action(
+			'admin_init',
+			[ $plugin_admin, 'pages_init' ]
+		);
+		$this->loader()->add_action(
+			'admin_menu',
+			[ $plugin_admin, 'add_plugin_pages' ]
+		);
+		$this->loader()->add_action(
+			'add_meta_boxes',
+			[ $plugin_admin, 'meta_init' ]
+		);
+		$this->loader()->add_action(
+			'admin_post_scrape_product_url',
+			[ $plugin_admin, 'scrape_product_url' ]
+		);
 		$this->loader()->add_action(
 			'save_post_' . static::postType,
-			[$plugin_admin, 'save_meta_hook']
+			[ $plugin_admin, 'save_meta_hook' ]
 		);
 		$this->loader()->add_action(
 			'manage_' . static::postType . '_posts_columns',
-			[$plugin_admin, 'inject_custom_columns']
+			[ $plugin_admin, 'inject_custom_columns' ]
 		);
 		$this->loader()->add_action(
 			'manage_' . static::postType . '_posts_custom_column',
-			[$plugin_admin, 'draw_custom_columns'],
+			[ $plugin_admin, 'draw_custom_columns' ],
 			10,
-			2 // two arguments to this method
+			2 // Two arguments to this method.
 		);
 	}
 

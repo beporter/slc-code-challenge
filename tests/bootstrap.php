@@ -1,10 +1,11 @@
 <?php
 /**
  * PHPUnit Bootstrap file.
+ *
+ * @package Bpdiff/tests
  */
 
-//@TODO: set up a copy of the WP tests.
-
+// @TODO: set up a copy of the WP tests.
 /**
  * You'll need to set `WP_TESTS_DIR` to the base directory of WordPress.
  *
@@ -20,13 +21,12 @@
  *   (For Windows: cygwin)
  *   `setx WP_TESTS_DIR "C:\tmp\wordpress-tests"`
  */
-if ( ! $wp_test_dir = getenv('WP_TESTS_DIR') ) {
+if ( ! $wp_test_dir = getenv( 'WP_TESTS_DIR' ) ) {
+	$wp_test_dir = '/tmp/wordpress-tests';
 
-    $wp_test_dir = '/tmp/wordpress-tests';
-
-    if ( ! file_exists($wp_test_dir) || ! file_exists($wp_test_dir . '/tests') ) {
-        die("Fatal Error: Could not find the WordPress tests directory.\n");
-    }
+	if ( ! file_exists( $wp_test_dir ) || ! file_exists( $wp_test_dir . '/tests' ) ) {
+		die( "Fatal Error: Could not find the WordPress tests directory.\n" );
+	}
 }
 
 /** Bootstraps the WordPress stack. */

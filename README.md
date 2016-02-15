@@ -25,7 +25,7 @@ Download the [latest release](https://github.com/dbeporter/wirecutter-code-chall
 
 #### Packagist
 
-@TODO: These instructions require the project being public and published on [Packagist](https://packagist.org).
+@TODO: These instructions require the project being public and published on [Packagist](https://packagist.org). They have not been tested.
 
 ```sh
 composer require beporter/bp-diffbot-products ~0.0.1
@@ -43,7 +43,7 @@ or
 
 #### Wordpress Packagist
 
-@TODO: These instructions require the project being public and published in the [Plugins Directory](https://wordpress.org/plugins/) (and mirrored to [WordPress Packagist](http://wpackagist.org/)).
+@TODO: These instructions require the project being public and published in the [Plugins Directory](https://wordpress.org/plugins/) (and mirrored to [WordPress Packagist](http://wpackagist.org/)). They have not been tested.
 
 If you're using Composer to manage WordPress, add this plugin to your project's dependencies. Run:
 
@@ -111,6 +111,36 @@ Please use [GitHub Isuses](https://github.com/dbeporter/wirecutter-code-challeng
 ### Development
 
 When developing this plugin, please fork and issue a PR for any new development.
+
+#### Unit Tests
+
+@TODO: Write test suite.
+
+#### Code Style Standard
+
+This project uses the WordPress Coding Standard. To test the code against the standard, run the following commands:
+
+```shell
+$ composer create-project wp-coding-standards/wpcs:dev-master --no-dev
+$ wpcs/vendor/bin/phpcs -ps --colors --standard=phpcs.xml
+```
+
+Fix any warnings or errors produced from this.
+
+
+## Credits:
+
+A list of the sources I used to complete this project. In no particular order and including some notes:
+
+* https://github.com/Varying-Vagrant-Vagrants/VVV - Gave me a jumpstart to an operational WP dev environment. Although I did have to upgrade PHP to 5.6.
+* https://generatewp.com/plugin-readme/ - Roughed in my readme.txt for me so I was sure to get the format correct.
+* https://github.com/loadsys/CakePHP-Plugin-Skeleton/ - Used my own existing skeleton for reference.
+* https://github.com/DevinVinson/WordPress-Plugin-Boilerplate - Provided the overall architecture for mine, although I simplified it a bit.
+* https://github.com/ptahdunbar/wp-skeleton-plugin - Not very helpful, although it is supposedly stubbed for unit tests.
+* https://github.com/diffbot/diffbot-php-client - The old "official" library. Very poor code quality, disappointing. This was my second choice.
+* https://github.com/Swader/diffbot-php-client - My first choice, but in spite of the failings of the old library, this one requires too many dependencies and additional work to get installed. With the old one at least it can be bundled directly into the plugin's repo as a single file, so I eventually replaced this one with the older one above. Thankfully that work was isolated entirely to my wrapper class and required no changes in my main admin interface class.
+* https://www.diffbot.com/dev/docs/ - Didn't need to use this much since the client libraries handled 90% of the heavy lifting.
+* https://developer.wordpress.org/reference/ - Spent a lot of time here refreshing my API knowledge.
 
 
 ## License

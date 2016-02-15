@@ -42,10 +42,11 @@ class Bpdiff_Loader {
 	/**
 	 * Add a new action to the collection to be registered with WordPress.
 	 *
-	 * @param    string               $hook             The name of the WordPress action that is being registered.
-	 * @param    callable             $callback         Either an array in the form [$object, 'method'] or a string function name or an anonymous function to supply as the callback method.
-	 * @param    int                  $priority         Optional. he priority at which the function should be fired. Default is 10.
-	 * @param    int                  $accepted_args    Optional. The number of arguments that should be passed to the $callback. Default is 1.
+	 * @param string   $hook The name of the WordPress action that is being registered.
+	 * @param callable $callback Either an array in the form [$object, 'method'] or a string function name or an anonymous function to supply as the callback method.
+	 * @param int      $priority Optional. he priority at which the function should be fired. Default is 10.
+	 * @param int      $accepted_args Optional. The number of arguments that should be passed to the $callback. Default is 1.
+	 * @return void
 	 */
 	public function add_action( $hook, $callback, $priority = 10, $accepted_args = 1 ) {
 		$this->actions[] = compact( 'hook', 'callback', 'priority', 'accepted_args' );
@@ -54,10 +55,11 @@ class Bpdiff_Loader {
 	/**
 	 * Add a new filter to the collection to be registered with WordPress.
 	 *
-	 * @param    string               $hook             The name of the WordPress filter that is being registered.
-	 * @param    callable             $callback         Either an array in the form [$object, 'method'] or a string function name or an anonymous function to supply as the callback method.
-	 * @param    int                  $priority         Optional. he priority at which the function should be fired. Default is 10.
-	 * @param    int                  $accepted_args    Optional. The number of arguments that should be passed to the $callback. Default is 1
+	 * @param string   $hook The name of the WordPress filter that is being registered.
+	 * @param callable $callback Either an array in the form [$object, 'method'] or a string function name or an anonymous function to supply as the callback method.
+	 * @param int      $priority Optional. he priority at which the function should be fired. Default is 10.
+	 * @param int      $accepted_args Optional. The number of arguments that should be passed to the $callback. Default is 1.
+	 * @return void
 	 */
 	public function add_filter( $hook, $callback, $priority = 10, $accepted_args = 1 ) {
 		$this->filters[] = compact( 'hook', 'callback', 'priority', 'accepted_args' );
@@ -66,7 +68,7 @@ class Bpdiff_Loader {
 	/**
 	 * Register the filters and actions with WordPress.
 	 *
-	 * @since    1.0.0
+	 * @return void
 	 */
 	public function run() {
 		foreach ( $this->filters as $hook ) {
