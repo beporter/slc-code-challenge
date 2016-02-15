@@ -288,7 +288,9 @@ class Bpdiff_Admin {
 			return;
 		}
 
-		// @TODO: Check a nonce?
+		// Verify the nonce that should be present.
+		check_admin_referer( Bpdiff::prefix . '_meta_' . $post_id, Bpdiff::prefix . '_save_meta_nonce' );
+
 		$this->save_meta( $post_id, $_POST );
 	}
 
@@ -342,7 +344,6 @@ class Bpdiff_Admin {
 		// Product post was created successfully. Redirect to it.
 		$params = [
 			'post' => $product_post_id,
-			// 'post_type' => Bpdiff::post_type,
 			'action' => 'edit',
 			$this->prefix => [
 				'e' => 'create-post-successful',
@@ -496,7 +497,8 @@ class Bpdiff_Admin {
 	 * @return void
 	 */
 	public function draw_meta_box( $post ) {
-		// @TODO: Set a nonce?
+		wp_nonce_field( Bpdiff::prefix . '_meta_' . $post->ID, Bpdiff::prefix . '_save_meta_nonce' );
+
 		echo '<table class="form-table"><tbody>';
 
 		foreach ( $this->metas as $name => $props ) {
