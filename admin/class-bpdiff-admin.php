@@ -279,7 +279,10 @@ class Bpdiff_Admin {
 	 */
 	public function save_meta_hook( $post_id ) {
 		// Short circuit if there is no POST data to work on.
-		if ( empty( $_POST ) ) {
+		// @codingStandardsIgnoreStart
+		$data = $_POST;
+		// @codingStandardsIgnoreEnd
+		if ( empty( $data ) ) {
 			return;
 		}
 
@@ -288,10 +291,12 @@ class Bpdiff_Admin {
 			return;
 		}
 
-		// Verify the nonce that should be present.
+		/*
+		// Verify the nonce that should be present. (Conflicts with redir in scrape_product_url().)
 		check_admin_referer( Bpdiff::prefix . '_meta_' . $post_id, Bpdiff::prefix . '_save_meta_nonce' );
+		*/
 
-		$this->save_meta( $post_id, $_POST );
+		$this->save_meta( $post_id, $data );
 	}
 
 	/**
@@ -349,7 +354,18 @@ class Bpdiff_Admin {
 				'e' => 'create-post-successful',
 			],
 		];
-		wp_redirect( '/wp-admin/post.php?' . http_build_query( $params ) );
+		$dest = '/wp-admin/post.php?' . http_build_query( $params );
+
+		/*
+		// Ineffective.
+		$dest = wp_nonce_url(
+			$dest,
+			Bpdiff::prefix . '_meta_' . $product_post_id,
+			Bpdiff::prefix . '_save_meta_nonce'
+		);
+		*/
+
+		wp_redirect( $dest );
 		exit;
 	}
 
@@ -367,7 +383,7 @@ class Bpdiff_Admin {
 		?>
 		<div class="wrap">
 			<h2>Add Product Post</h2>
-			<p>Paste a product URL below to have the <a href="https://www.diffbot.com">DiffBot</a> service scrape a product page from a remote site and create a new Product Post in WordPress. DiffBot may take up to a minute to return results, so please be patient.</p>
+			<p>Paste a product URL below to have the <a href="https://www.diffbot.com">DiffBot</a> service scrape a product page from a remote site and create a new Product Post in WordPress. <strong>DiffBot may take up to a minute to return results, so please be patient.</strong></p>
 			<form method="post" action="admin-post.php">
 				<input type="hidden" name="action" value="scrape_product_url">
 				<table class="form-table">
@@ -497,6 +513,7 @@ class Bpdiff_Admin {
 	 * @return void
 	 */
 	public function draw_meta_box( $post ) {
+		// Not checked. Conflicts with redir in scrape_product_url().
 		wp_nonce_field( Bpdiff::prefix . '_meta_' . $post->ID, Bpdiff::prefix . '_save_meta_nonce' );
 
 		echo '<table class="form-table"><tbody>';
@@ -529,7 +546,7 @@ class Bpdiff_Admin {
 			'post_type' => Bpdiff::post_type,
 		];
 		$post_id = wp_insert_post( $post );
-		if ( $post_id instanceof WP_Error ) {
+		if ( is_wp_error( $post_id ) ) {
 			return false;
 		}
 
@@ -571,9 +588,13 @@ class Bpdiff_Admin {
 					$key,
 					$value
 				);
+
+				/*
+				// Can't do this because the update_post_meta() returns false if the value is "unchanged".
 				if ( ! $success ) {
 					return false;
 				}
+				*/
 			}
 		}
 
