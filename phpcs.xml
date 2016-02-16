@@ -5,6 +5,7 @@
 	<file>./</file>
 	<exclude-pattern>/includes/class-diffbot.php</exclude-pattern>
 	<exclude-pattern>/wpcs/*</exclude-pattern>
+	<exclude-pattern>/wp-cli/*</exclude-pattern>
 	<exclude-pattern>*/index.php</exclude-pattern>
 
 	<arg name="report" value="full"/>

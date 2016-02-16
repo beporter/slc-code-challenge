@@ -5,8 +5,9 @@ Code challenge for wirecutter.com. Provides a WP-Admin interface for adding cust
 
 ## Requirements
 
-* PHP 5.5
+* PHP 5.6
 * WordPress 4.4 or later (maybe earlier, not tested).
+
 
 ## Features
 
@@ -17,11 +18,14 @@ Code challenge for wirecutter.com. Provides a WP-Admin interface for adding cust
 
 ## Installation
 
+
 ### Plugin manager from your `wp-admin`
 
 Download the [latest release](https://github.com/dbeporter/wirecutter-code-challenge/releases) and upload it in the WordPress admin from **Plugins > Add New > Upload Plugin**.
 
+
 ### Composer
+
 
 #### Packagist
 
@@ -100,28 +104,78 @@ To import a new product page:
 
 > _This plugin is not intended for public use. I humbly discourage you from contributing, since it would likely be a waste of your time. However, in the interest of thoroughness..._
 
+
 ### Code of Conduct
 
 Please note that this project is released with a Contributor [Code of Conduct](CODE_OF_CONDUCT.md), based on the [Contributor Covenant](http://contributor-covenant.org/). By participating in this project you agree to abide by its terms.
 
+
 ### Reporting Issues
 
-Please use [GitHub Isuses](https://github.com/dbeporter/wirecutter-code-challenge/issues) for listing any known defects or issues.
+Please use [GitHub Isuses](https://github.com/dbeporter/wirecutter-code-challenge/issues) for reporting any defects or issues.
+
 
 ### Development
 
-When developing this plugin, please fork and issue a PR for any new development.
+When developing this plugin, please fork this repo and issue a PR from a topic branch for any new development.
+
+You should have at least [git](https://git-scm.com/downloads), [php](https://secure.php.net/manual/en/install.php) v5.6, [composer](https://getcomposer.org/doc/00-intro.md) and a text editor of your choosing installed in order to work on this plugin.
+
+
+### Environment
+
+This plugin was developed using [VVV](https://github.com/Varying-Vagrant-Vagrants/VVV#the-first-vagrant-up). It's best to start there if you don't already have a WordPress installation available to tinker with. This will in turn require [Vagrant](https://www.vagrantup.com/downloads.html) and [VirtualBox](https://www.virtualbox.org/wiki/Downloads). _Yep, it's turtles all the way down._
+
+```shell
+# (Get VirtualBox installed.)
+
+# (Then get Vagrant installed.)
+
+# Then install VVV:
+$ cd some/project/dir/
+$ git clone https://github.com/Varying-Vagrant-Vagrants/VVV.git vagrant-local
+$ cd vagrant-local
+$ vagrant up
+# (Go get some coffee or something, this will take a while.)
+
+# Once this is complete, you should have a `www/wordpress-default/` folder.
+
+# Clone this plugin into the appropriate working folder:
+$ cd www/wordpress-default/wp-content/plugins/
+$ git clone git@github.com:beporter/wirecutter-code-challenge.git bp-diffbot-products
+$ cd bp-diffbot-products/
+$ composer install
+```
+
 
 #### Unit Tests
 
-@TODO: Write test suite.
+To prepare for running the unit tests, install [WP-CLI](http://wp-cli.org/) locally:
+
+```shell
+$ cd path/to/wp-content/plugins/bp-diffbot-products/
+
+# Run this once from the plugin root folder:
+$ composer create-project wp-cli/wp-cli --prefer-source
+
+# Run this whenever you want to run your tests.
+$ wp-cli/vendor/bin/phpunit
+```
+
+@TODO: Actually write the test suite.
+
 
 #### Code Style Standard
 
 This project uses the WordPress Coding Standard. To test the code against the standard, run the following commands:
 
 ```shell
+$ cd path/to/wp-content/plugins/bp-diffbot-products/
+
+# Run this once:
 $ composer create-project wp-coding-standards/wpcs:dev-master --no-dev
+
+# Run this whenever you want to check your code.
 $ wpcs/vendor/bin/phpcs -ps --colors --standard=phpcs.xml
 ```
 
@@ -141,7 +195,7 @@ A list of the sources I used to complete this project. In no particular order an
 * https://github.com/Swader/diffbot-php-client - My first choice, but in spite of the failings of the old library, this one requires too many dependencies and additional work to get installed. With the old one at least it can be bundled directly into the plugin's repo as a single file, so I eventually replaced this one with the older one above. Thankfully that work was isolated entirely to my wrapper class and required no changes in my main admin interface class.
 * https://www.diffbot.com/dev/docs/ - Didn't need to use this much since the client libraries handled 90% of the heavy lifting.
 * https://developer.wordpress.org/reference/ - Spent a lot of time here refreshing my API knowledge.
-
+*
 
 ## License
 

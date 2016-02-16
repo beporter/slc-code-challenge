@@ -5,7 +5,6 @@
  * @package Bpdiff/tests
  */
 
-// @TODO: set up a copy of the WP tests.
 /**
  * You'll need to set `WP_TESTS_DIR` to the base directory of WordPress.
  *
@@ -21,13 +20,32 @@
  *   (For Windows: cygwin)
  *   `setx WP_TESTS_DIR "C:\tmp\wordpress-tests"`
  */
-if ( ! $wp_test_dir = getenv( 'WP_TESTS_DIR' ) ) {
-	$wp_test_dir = '/tmp/wordpress-tests';
+$_guesses = [
+	getenv( 'WP_TESTS_DIR' ), // A local environment override.
+	'/tmp/wordpress-tests-lib', // Ddefault install location?
+	dirname( dirname( dirname( dirname( __FILE__ ) ) ) ), // Perhaps we are in a VVV install?
+];
 
-	if ( ! file_exists( $wp_test_dir ) || ! file_exists( $wp_test_dir . '/tests' ) ) {
-		die( "Fatal Error: Could not find the WordPress tests directory.\n" );
+$_tests_dir = false;
+foreach ( $_guesses as $_guess ) {
+	if ( file_exists( $_guess ) && file_exists( $_guess . '/tests' ) ) {
+		$_tests_dir = $_guess;
+		break;
 	}
 }
 
-/** Bootstraps the WordPress stack. */
-require_once $wp_test_dir . '/tests/phpunit/includes/bootstrap.php';
+if ( ! $_tests_dir ) {
+	die( "Fatal Error: Could not find the WordPress tests directory.\n" );
+}
+
+require_once $_tests_dir . '/includes/functions.php';
+
+/**
+ * Provide a hook for injecting the plugin.
+ */
+function _manually_load_plugin() {
+	require dirname( dirname( __FILE__ ) ) . '/bp-diffbot-products.php';
+}
+tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
+
+require $_tests_dir . '/includes/bootstrap.php';
