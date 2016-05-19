@@ -1,6 +1,6 @@
 # bp-diffbot-products
 
-Code challenge for wirecutter.com. Provides a WP-Admin interface for adding custom Product posts based on information retrieved from the DiffBot API.
+Code challenge for SLC application. Provides a WP-Admin interface for adding custom Product posts based on information retrieved from the DiffBot API.
 
 
 ## Requirements
