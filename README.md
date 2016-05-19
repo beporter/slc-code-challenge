@@ -21,7 +21,7 @@ Code challenge for SLC application. Provides a WP-Admin interface for adding cus
 
 ### Plugin manager from your `wp-admin`
 
-Download the [latest release](https://github.com/dbeporter/wirecutter-code-challenge/releases) and upload it in the WordPress admin from **Plugins > Add New > Upload Plugin**.
+Download the [latest release](https://github.com/dbeporter/slc-code-challenge/releases) and upload it in the WordPress admin from **Plugins > Add New > Upload Plugin**.
 
 
 ### Composer
@@ -112,7 +112,7 @@ Please note that this project is released with a Contributor [Code of Conduct](C
 
 ### Reporting Issues
 
-Please use [GitHub Isuses](https://github.com/dbeporter/wirecutter-code-challenge/issues) for reporting any defects or issues.
+Please use [GitHub Isuses](https://github.com/beporter/slc-code-challenge/issues) for reporting any defects or issues.
 
 
 ### Development
