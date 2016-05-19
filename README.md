@@ -142,7 +142,7 @@ $ vagrant up
 
 # Clone this plugin into the appropriate working folder:
 $ cd www/wordpress-default/wp-content/plugins/
-$ git clone git@github.com:beporter/wirecutter-code-challenge.git bp-diffbot-products
+$ git clone git@github.com:beporter/slc-code-challenge.git bp-diffbot-products
 $ cd bp-diffbot-products/
 $ composer install
 ```
